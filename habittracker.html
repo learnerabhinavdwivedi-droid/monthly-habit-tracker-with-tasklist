@@ -1,0 +1,568 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Habit Tracker</title>
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/png" href="samurai.png">
+
+  <!-- Custom Font -->
+  <link href="https://fonts.cdnfonts.com/css/young-serif" rel="stylesheet">
+
+  <!-- External CSS -->
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<div id="rollingCalendar"></div>
+
+  <!-- Title and subtitle -->
+  <h1 id="title">MONTH</h1>
+  <h2 id="subtitle">Monthly Habit Tracker</h2>
+
+  <!-- Calendar -->
+  <div id="calendarContainer">
+    <div id="calendardiv">
+      <div id="calendarheading">
+        <p id="habittitle">My New Habit</p>
+        <p id="totaldays">0/30 days</p>
+      </div>
+      <div id="calendarcontent">
+        <div id="tracker">
+          <!-- 5 rows × 7 columns (35 cells) -->
+          <div class="days">
+            <div class="day"></div><div class="day"></div><div class="day"></div>
+            <div class="day"></div><div class="day"></div><div class="day"></div>
+            <div class="day"></div>
+          </div>
+          <div class="days">
+            <div class="day"></div><div class="day"></div><div class="day"></div>
+            <div class="day"></div><div class="day"></div><div class="day"></div>
+            <div class="day"></div>
+          </div>
+          <div class="days">
+            <div class="day"></div><div class="day"></div><div class="day"></div>
+            <div class="day"></div><div class="day"></div><div class="day"></div>
+            <div class="day"></div>
+          </div>
+          <div class="days">
+            <div class="day"></div><div class="day"></div><div class="day"></div>
+            <div class="day"></div><div class="day"></div><div class="day"></div>
+            <div class="day"></div>
+          </div>
+          <div class="days">
+            <div class="day"></div><div class="day"></div><div class="day"></div>
+            <div class="day"></div><div class="day"></div><div class="day"></div>
+            <div class="day"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Streak counter -->
+  <p>🔥 Streak: <span id="streakCount">0</span></p>
+
+  <!-- To-do list -->
+  <div id="todoContainer">
+    <h3>📝 Month TaskList</h3>
+    <ul id="todoList"></ul>
+    <input type="text" id="todoInput" placeholder="Add a task...">
+    <button onclick="addTask()">Add</button>
+  </div>
+
+  <!-- Blossom Layer -->
+  <div id="blossomLayer"></div>
+
+  <!-- Reset button -->
+  <div id="resetWrapper">
+    <button id="resetButton" onclick="resetTracker()">🔄 Reset Tracker</button>
+  </div>
+
+  <!-- Lofi audio -->
+  <audio id="lofiAudio" autoplay loop>
+    <source src="samurai.mp3.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- Status area -->
+  <div id="habitStatus"></div>
+
+  <!-- External JS -->
+  <script src="script.js"></script>
+</body>
+
+<style>
+#rollingCalendar {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 220px;
+  height: 100vh;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  font-family: 'Ninja Naruto', cursive;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+#rollingCalendar ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  animation: scrollCalendar 25s linear infinite;
+}
+
+#rollingCalendar li {
+  font-size: 18px;
+  margin: 15px 0;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 4px #000;
+}
+
+@keyframes scrollCalendar {
+  0%   { transform: translateY(100%); }
+  100% { transform: translateY(-100%); }
+}
+
+/* Blossom Layer */
+#blossomLayer {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 999;
+  overflow: hidden;
+}
+
+.sparkle {
+  position: fixed;
+  width: 8px;
+  height: 8px;
+  background: white;
+  border-radius: 50%;
+  pointer-events: none;
+  box-shadow: 0 0 6px white, 0 0 12px white;
+  animation: fadeSparkle 0.8s forwards;
+  z-index: 10000;
+}
+
+@keyframes fadeSparkle {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.3); }
+}
+
+#lofiAudio { display: none; }
+
+/* Petal style */
+.petal {
+  position: absolute;
+  top: -40px;
+  width: 16px;
+  height: 12px;
+  background: radial-gradient(closest-side, #ffc0cb 60%, #ff85a2 100%);
+  border-radius: 60% 40% 60% 40%;
+  opacity: 0.85;
+  filter: drop-shadow(0 2px 3px rgba(0,0,0,0.15));
+  animation-name: fall, sway;
+  animation-timing-function: linear, ease-in-out;
+  animation-iteration-count: infinite, infinite;
+}
+
+@keyframes fall {
+  0%   { transform: translateY(-40px) rotate(0deg); opacity: 0; }
+  10%  { opacity: 0.9; }
+  100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
+}
+
+@keyframes sway {
+  0%   { margin-left: -20px; }
+  50%  { margin-left: 20px; }
+  100% { margin-left: -20px; }
+}
+
+/* Todo list */
+#todoContainer {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  background-color: rgba(255, 255, 255, 0.9);
+  border: 2px solid #ccc;
+  border-radius: 10px;
+  padding: 15px;
+  width: 200px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+#todoContainer h3 { margin-top: 0; font-size: 16px; }
+#todoList { list-style-type: none; padding: 0; margin: 10px 0; }
+#todoList li { margin: 5px 0; cursor: pointer; }
+#todoInput { width: 120px; padding: 5px; }
+
+/* General body */
+body {
+  background-image: url("samuraiwall.avif");
+  background-size: cover;
+  text-align: center;
+  font-family: 'Young Serif', serif;
+  cursor: url("Copilot_20251231_074919.png") 0 0, auto;
+}
+
+#title {
+  margin-top: 100px;
+  line-height: 10px;
+  font-size: 70px;
+}
+
+#subtitle {
+  opacity: 0.7;
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+
+#calendarContainer { display: flex; }
+#calendardiv {
+  background-color: white;
+  border-radius: 10px 10px 20px 20px;
+  margin: auto;
+  border: 2px solid rgb(255, 20, 255);
+}
+
+#calendarheading {
+  display: flex;
+  justify-content: space-between;
+  border-radius: 10px 15px 0px 0px;
+  border: 2px solid rgb(255, 255, 255);
+  padding: 0px 20px;
+  font-size: 20px;
+  background-color: pink;
+}
+
+.days { display: flex; justify-content: center; }
+.day {
+  border: 2px solid black;
+  width: 30px;
+  height: 30px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 15px;
+  cursor: pointer;
+  border-radius: 50%;
+  margin: 5px;
+  background-color: wheat;
+}
+
+#resetButton {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background-color: #e63946;
+  color: white;
+  border: 2px solid rgb(255, 20, 255);
+  border-radius: 10px 10px 20px 20px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+#resetButton:hover {
+  background-color: #d62828;
+  transform: scale(1.05);
+}
+
+.cursorAura {
+  position: absolute;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(229, 57, 235, 0.3);
+  box-shadow: 0 0 15px rgb(255, 168, 168);
+  pointer-events: none;
+  transform-origin: center;
+  transform: translate(-50%, -50%);
+  z-index: 9999;
+    transition: background cubic-bezier(0.215, 0.610, 0.355, 1), box-shadow 0.2s;
+}
+
+#rollingCalendar {
+  
+  background-size: 100% 100%;         /* Stretch to fill container */
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 220px;                       /* Fixed width for left strip */
+  height: 100vh;                      /* Full vertical height */
+  padding: 20px 10px;                 /* Clean padding */
+  opacity: 0.9;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Ninja Naruto', cursive;
+  color: #fff;
+  text-shadow: 1px 1px 3px #f30096;
+  position: fixed;
+  left: 0;
+  top: 0;
+  z-index: 1000;
+}
+
+
+
+
+
+
+</style>
+
+  <script>
+// Reset tracker function
+function resetTracker() {
+  if (!confirm("Are you sure you want to reset your tracker?")) return;
+
+  // Clear localStorage for this month
+  for (var i = 1; i <= daysinthemonth; i++) {
+    var key = (currentmonth + 1) + "-" + i + "-" + currentyear;
+    localStorage.removeItem(key);
+  }
+
+  // Reset day cells’ visuals
+  for (var i = 1; i <= daysinthemonth; i++) {
+    var daycell = document.getElementById("day" + i);
+    if (daycell) {
+      daycell.style.backgroundColor = "wheat";
+      daycell.style.border = "2px solid black";
+    }
+  }
+
+  // Reset counters
+  dayscompleted = 0;
+  streak = 0;
+  totaldays.innerHTML = "0/" + daysinthemonth;
+  streakCount.innerHTML = "0";
+}
+
+
+
+
+
+
+// Cursor aura
+const aura = document.createElement("div");
+aura.className = "cursorAura";
+document.body.appendChild(aura);
+
+document.addEventListener("mousemove", function(e) {
+  aura.style.left = e.pageX + "px";
+  aura.style.top = e.pageY + "px";
+});
+
+// Add task function
+function addTask() {
+  var input = document.getElementById("todoInput");
+  var task = input.value.trim();
+
+  if (task.length > 0) {
+    var li = document.createElement("li");
+    li.textContent = task;
+
+    // click to mark as done
+    li.onclick = function() {
+      li.style.textDecoration =
+        li.style.textDecoration === "line-through" ? "none" : "line-through";
+    };
+
+    document.getElementById("todoList").appendChild(li);
+    input.value = "";
+  }
+}
+
+// Date info
+var date = new Date();
+var currentmonth = date.getMonth();
+var currentdate = date.getDate();
+var currentyear = date.getFullYear();
+
+var months = [
+  "January","February","March","April","May","June",
+  "July","August","September","October","November","December"
+];
+
+// Set month title
+var title = document.getElementById("title");
+title.innerHTML = "⛩️" + months[currentmonth] + "⛩️";
+
+// Habit title
+var habittitle = document.getElementById("habittitle");
+habittitle.onclick = function() {
+  let habits = prompt("What's your habit?", habittitle.innerHTML);
+  if (!habits || habits.length === 0) {
+    habittitle.innerHTML = "click to set habit";
+  } else {
+    habittitle.innerHTML = habits;
+  }
+};
+
+// Days in month
+var daysinthemonthlist = [31,28,31,30,31,30,31,31,30,31,30,31];
+var daysinthemonth = daysinthemonthlist[currentmonth];
+
+var dayscompleted = 0;
+var totaldays = document.getElementById("totaldays");
+totaldays.innerHTML = "0/" + daysinthemonth;
+
+//ninja
+function buildRollingCalendar() {
+  const rolling = document.getElementById("rollingCalendar");
+  const ul = document.createElement("ul");
+
+  // Motivational messages for each day
+  const motivations = [
+    "Focus like a ninja ⚔️",
+    "Discipline builds strength 💪",
+    "Silent effort, loud results 🌌",
+    "Sharpen your mind like a blade 🗡️",
+    "Consistency is your true weapon 🏹",
+    "Patience wins battles 🕰️",
+    "Train body, train spirit 🧘",
+    "Every step is progress 🚶",
+    "Honor your commitments 🏯",
+    "Rise early, strike true 🌅",
+    "Balance is power ⚖️",
+    "Adapt like water 🌊",
+    "Cut doubts with courage ✨",
+    "Victory is persistence 🔥",
+    "Calm mind, fierce heart 🐉",
+    "Respect the journey 🛤️",
+    "Sharpen skills daily ⚔️",
+    "Focus beats talent 🎯",
+    "Strength in silence 🤫",
+    "Dedication is destiny 🌠",
+    "Your habit is your blade 🗡️",
+    "Fight laziness, win life 🥋",
+    "Small wins build empires 🏯",
+    "Discipline is freedom 🕊️",
+    "Every day counts 📅",
+    "Stay humble, stay sharp 🙇",
+    "Energy flows where focus goes 🔮",
+    "Your path is your power 🛤️",
+    "Strike with intent ⚡",
+    "Endure, evolve, excel 🌟",
+    "Today is your dojo 🏯"
+  ];
+
+  // Fill rolling calendar with days + motivation
+  for (let i = 1; i <= motivations.length; i++) {
+    const li = document.createElement("li");
+    li.textContent = `Day ${i}: ${motivations[i-1]}`;
+    ul.appendChild(li);
+  }
+
+  rolling.appendChild(ul);
+}
+
+// Run on load
+document.addEventListener("DOMContentLoaded", buildRollingCalendar);
+
+
+// Calendar days
+var daycount = 0;
+var dayCells = document.getElementsByClassName("day");
+
+for (var j = 0; j < dayCells.length; j++) {
+  if (daycount < daysinthemonth) {
+    dayCells[j].innerHTML = daycount + 1;
+    dayCells[j].id = "day" + (daycount + 1);
+    dayCells[j].classList.add("dayCell");
+    daycount++;
+  } else {
+    dayCells[j].innerHTML = "";
+    dayCells[j].style.border = "none";
+    dayCells[j].style.backgroundColor = "white";
+    dayCells[j].style.cursor = "default";
+  }
+}
+
+// Lofi audio
+window.addEventListener("click", function() {
+  const audio = document.getElementById("lofiAudio");
+  if (audio && audio.paused) {
+    audio.play();
+  }
+}, { once: true });
+
+// Streak
+var streak = 0;
+var streakCount = document.getElementById("streakCount");
+
+// petal generation
+function createPetal(layer) {
+  const p = document.createElement("div");
+  p.className = "petal";
+
+  // random horizontal start
+  p.style.left = Math.random() * 100 + "vw";
+
+  // random animation duration & delay
+  const fallDuration = 8 + Math.random() * 6; // 8–14s
+  const swayDuration = 3 + Math.random() * 3; // 3–6s
+  const delay = Math.random() * 5;
+
+  p.style.animationDuration = `${fallDuration}s, ${swayDuration}s`;
+  p.style.animationDelay = `${delay}s, ${delay/2}s`;
+
+  // random size variation
+  const w = 12 + Math.floor(Math.random() * 10);
+  const h = 10 + Math.floor(Math.random() * 8);
+  p.style.width = `${w}px`;
+  p.style.height = `${h}px`;
+
+  layer.appendChild(p);
+
+  // remove petal after it falls
+  setTimeout(() => {
+    p.remove();
+  }, (fallDuration + delay) * 1000);
+}
+window.onload = function() {
+  const layer = document.getElementById("blossomLayer");
+  const petalCount = 30;
+
+  for (let i = 0; i < petalCount; i++) {
+    createPetal(layer);
+  }
+
+  setInterval(() => {
+    createPetal(layer);
+  }, 1000);
+};
+
+
+
+// Mark day complete
+document.addEventListener("click", function(e) {
+  if (e.target.classList.contains("dayCell")) {
+    const dayNum = e.target.innerHTML;
+    const key = (currentmonth + 1) + "-" + dayNum + "-" + currentyear;
+
+    e.target.style.backgroundColor = "lightgreen";
+    e.target.style.border = "2px solid darkgreen";
+
+    localStorage.setItem(key, "completed");
+
+    streak++;
+    streakCount.innerHTML = streak;
+
+    dayscompleted++;
+    totaldays.innerHTML = dayscompleted + "/" + daysinthemonth;
+  }
+
+});
+</script>
+
+</html>
